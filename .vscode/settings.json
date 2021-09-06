@@ -1,0 +1,8 @@
+{
+	"editor.fontFamily": "'Fira Code'",
+	"editor.fontLigatures": true,
+	"diffEditor.codeLens": true,
+	"diffEditor.wordWrap": "on",
+	"editor.minimap.enabled": false,
+	"editor.quickSuggestions": true
+}
