@@ -33,34 +33,54 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser('12345-67890-09876-54321'));
 
 function auth(req, res, next) {
-  console.log("request headers: ", req.headers);
-  const authHeader = req.headers.authorization;
-  
-  if (!authHeader) {
-      const err = new Error('You are not authenticated!');
-      res.setHeader('WWW-Authenticate', 'Basic');
-      err.status = 401;
-      return next(err);
-  }
+  if(!req.signedCookies.user) {
+    // console.log("request headers: ", req.headers);
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader) {
+        const err = new Error('You are not authenticated!');
+        res.setHeader('WWW-Authenticate', 'Basic');
+        err.status = 401;
+        return next(err);
+    }
 
-  console.log("authHeader", authHeader);
-  console.log('Buffer.from("YWRtaW46cGFzc3dvcmQ=", "base64")\n', Buffer.from("YWRtaW46cGFzc3dvcmQ=", 'base64'));
-  console.log('Buffer.from("YWRtaW46cGFzc3dvcmQ=", "base64").toString()', Buffer.from("YWRtaW46cGFzc3dvcmQ=", 'base64').toString());
+    // console.log("authHeader", authHeader);
+    // console.log('Buffer.from("YWRtaW46cGFzc3dvcmQ=", "base64")\n', Buffer.from("YWRtaW46cGFzc3dvcmQ=", 'base64'));
+    // console.log('Buffer.from("YWRtaW46cGFzc3dvcmQ=", "base64").toString()', Buffer.from("YWRtaW46cGFzc3dvcmQ=", 'base64').toString());
 
-  const auth = Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
-  const user = auth[0];
-  const pass = auth[1];
+    const auth = Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
+    const user = auth[0];
+    const pass = auth[1];
+    // check username & password are valid
+    if (user === 'admin' && pass === 'password') {
+        res.cookie('user', 'admin', {signed: true});
+        /* res.cookie(arg1, arg2, arg3): create a new cookie for the authed user
+              'user'/arg1: prop name/key for cookie. creates a 'user' property 
+                           on the signed cookie object
+              'admin'/arg2: the value stored in the name property  (aka. user: 'admin')
 
-  if (user === 'admin' && pass === 'password') {
+              {signed: true}/arg3: object with config values. set signed to true so express can use the secret key from cookie-parser and make a signed cookie
+              */
+        return next(); // authorized
+    } else {
+        const err = new Error('You are not authenticated!');
+        res.setHeader('WWW-Authenticate', 'Basic');      
+        err.status = 401;
+        return next(err);
+    }
+  } // ./end of if(!req.signedCookies.user) conditional
+  else {
+    if(req.signedCookies.user === 'admin') {
       return next(); // authorized
-  } else {
-      const err = new Error('You are not authenticated!');
-      res.setHeader('WWW-Authenticate', 'Basic');      
-      err.status = 401;
-      return next(err);
+    } 
+    else {
+        const err = new Error('You are not authenticated!');
+        err.status = 401;
+        return next(err);
+    }
   }
 }
 
