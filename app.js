@@ -4,6 +4,7 @@ var path = require('path');
 
 var logger = require('morgan');
 const passport = require('passport');
+const authenticate = require('./authenticate');
 const config = require('./config');
 
 var indexRouter = require('./routes/index');

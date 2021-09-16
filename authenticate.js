@@ -13,7 +13,7 @@ passport.deserializeUser(User.deserializeUser());
 
 exports.getToken = user => {
 	return jwt.sign(user, config.secretKey, {expiresIn: 3600});
-}
+};
 
 const opts = {};
 
@@ -27,11 +27,11 @@ exports.jwtPassport = passport.use(
 			console.log('JWT payload: ', jwt_payload);
 			User.findOne({_id: jwt_payload._id}, (err, user) => {
 				if(err) {
-					return done(err, false);
-				} else if(user) {
-					return done(null, user);
-				} else {
-					return done(null, false);
+					return done(err, false); // error, no user found
+				} else if(user) { // a user document was found
+					return done(null, user); //null: no error, return user document
+				} else { 
+					return done(null, false); // no error, no user found either
 				}
 			});
 		}
@@ -39,3 +39,16 @@ exports.jwtPassport = passport.use(
 );
 
 exports.verifyUser = passport.authenticate('jwt', {session: false});
+exports.verifyAdmin = (req, res, next) => {
+	const isAdmin = req.user.admin;
+	console.log("isAdmin", isAdmin);
+	if(isAdmin){
+		return next();
+	}
+	else if(!isAdmin) {
+		const err = new Error("You are not authorized to perform this operation!");
+		res.statusCode = 403;
+		return next(err);
+	}
+	
+};
