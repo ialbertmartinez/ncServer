@@ -173,9 +173,12 @@ campsiteRouter.route('/:campsiteId/comments/:commentId')
     res.end(`POST operation not supported on /campsites/${req.params.campsiteId}/comments/${req.params.commentId}`);
 })
 .put(authenticate.verifyUser, (req, res, next) => {
+    const userId = req.user._id;
+    console.log("req.user._id", userId);
     Campsite.findById(req.params.campsiteId)
     .then(campsite => {
-        if(req.user._id.equals(campsite.comments.author)) {
+        console.log("campsite", campsite.comments[0].author._id);
+        if(userId.equals(campsite.comments[0].author._id)) {
             if (campsite && campsite.comments.id(req.params.commentId)) {
                 if (req.body.rating) {
                     campsite.comments.id(req.params.commentId).rating = req.body.rating;
