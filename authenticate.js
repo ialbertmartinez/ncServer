@@ -43,12 +43,12 @@ exports.verifyAdmin = (req, res, next) => {
 	const isAdmin = req.user.admin;
 	console.log("isAdmin", isAdmin);
 	if(isAdmin){
-		return next();
+		next();
 	}
 	else if(!isAdmin) {
 		const err = new Error("You are not authorized to perform this operation!");
 		res.statusCode = 403;
-		return next(err);
+		next(err);
 	}
 	
 };
