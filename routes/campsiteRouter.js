@@ -87,11 +87,10 @@ campsiteRouter.route('/:campsiteId/comments')
     Campsite.findById(req.params.campsiteId)
     .populate('comments.author')
     .then(campsite => {
-        //check if campsite to check if the document is returned
         if (campsite) {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
-            res.json(campsite.comments); //ensure correct format
+            res.json(campsite.comments);
         } else {
             err = new Error(`Campsite ${req.params.campsiteId} not found`);
             err.status = 404;
