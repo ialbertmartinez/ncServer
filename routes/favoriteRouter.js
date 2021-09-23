@@ -30,10 +30,13 @@ favoriteRouter.route('/')
 			if(favdoc) {
 				// do any campsite objectId's from request.body NOT match objectId's from user's favorite.campsites?
 				req.body.forEach(campsite  => {
-					if(!favdoc.campsites.includes(campsite)) {
-						for(let i=0; i < favdoc.campsites.length; i++)
+					if(!favdoc.campsites.indexOf(campsite) == -1) {
 						console.log(campsite);
 						favdoc.campsites.push(campsite);
+					}
+					else {
+						res.setHeader("Content-Type", "application/json");
+						res.json("That campsite is already in the list of favorites!");
 					}
 				});
 				favdoc.save()
@@ -45,8 +48,7 @@ favoriteRouter.route('/')
 				.catch(err => next(err));
 			}
 			else { // user does not have a fav doc yet
-				Favorite.create({user: req.user._id, campsites: req.body});
-				Favorite.save()
+				Favorite.create({user: req.user._id, campsites: req.body})
 				.then(favorite => {
 					console.log('Favorite Created ', favorite);
 					res.statusCode = 200;
@@ -103,7 +105,6 @@ favoriteRouter.route('/:campsiteId')
 		} 
 		else {
 			Favorite.create({user: req.user._id, campsites: req.params.campsiteId})
-			Favorite.save()
 			.then(favorite => {
 				console.log('Favorite Created ', favorite);
 				res.statusCode = 200;
